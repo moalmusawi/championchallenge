@@ -1,0 +1,5 @@
+{
+  "name": "champion Challenge ",
+  "description": "A simple and elegant platform to organize neighborhood football matches. It clearly registers players and distributes them into two or more fair teams, ensuring balanced strength and complementary positions. The interface is bilingual (Arabic/English) and automatically adapts to RTL/LTR.",
+  "requestFramePermissions": []
+}
