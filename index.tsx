@@ -1,5 +1,5 @@
 
-import React, { useState, createContext, useContext, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, createContext, useContext, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
 // --- TYPES AND CONSTANTS ---
@@ -1589,7 +1589,7 @@ const RoulettePage = ({ participants, onDeleteWinner }) => {
         ctx.restore();
     }, [participants]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
         if (!canvas || !container) return;
@@ -1648,13 +1648,21 @@ const RoulettePage = ({ participants, onDeleteWinner }) => {
             if (elapsedTime >= spinTime) {
                 rotationRef.current = totalAngle;
                 drawWheel(totalAngle);
-                
+
                 const finalAngle = totalAngle % (2 * Math.PI);
-                const pointerAngle = (2 * Math.PI) - finalAngle + (Math.PI / 2);
                 const arcSize = 2 * Math.PI / participants.length;
-                const winnerIndex = Math.floor((pointerAngle % (2 * Math.PI)) / arcSize);
+
+                // The pointer is at the top, which corresponds to 270 degrees or 3*PI/2 radians.
+                // We calculate the angle on the un-rotated wheel that corresponds to the pointer's position.
+                const winningSegmentAngle = ((3 * Math.PI / 2) - finalAngle + 4 * Math.PI) % (2 * Math.PI);
+                const winnerIndex = Math.floor(winningSegmentAngle / arcSize);
                 
-                setWinner(participants[winnerIndex]);
+                if (participants[winnerIndex]) {
+                    setWinner(participants[winnerIndex]);
+                } else {
+                    console.error("Winner calculation error", { winnerIndex, numParticipants: participants.length });
+                    setWinner(participants[0]); // Fallback
+                }
                 setIsSpinning(false);
                 return;
             }
